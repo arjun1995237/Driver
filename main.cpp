@@ -31,6 +31,7 @@ int main(int argc, char *argv[]){
     	ofstream outfile;
    	outfile.open("example.txt");
     	int serial_port=open(argv[1],O_RDWR);
+        double time=stod(argv[2]);
 	cout<<argv[1]<<" ";
     	if(serial_port<0){
         	printf("Error %i from open: %s\n", errno, std::strerror(errno));
@@ -76,38 +77,47 @@ int main(int argc, char *argv[]){
 
 	while(1){
 
-	cout<<"Select your options? [1 - Tune; 0 - Display; 2-Move Forward; 3-Move Backward; 4-Stop; -1-Exit]\n";cin>>option;
+	cout<<"Select your options? [1 - Tune (Kp, Ki & Kd); 0 - Start recording; 2-Move Forward; 3-Move Backward; 4-Stop; 5- Set Speed; -1-Exit]\n";cin>>option;
 	if(option=='0'){
-		write(serial_port,&option,1);
- 		char* read_buf=new char;
-		while(1){
-			num_bytes = read(serial_port,read_buf,1);
- 			if (num_bytes < 0) {
-      			printf("Error reading: %s", strerror(errno));
-      			return 1;
-      			 }
-      			if(*read_buf!='\n')
-        			result=result+char(*read_buf);
-    			else
-        			break;
-			}// write inputted data into the file.
-		cout<<"writing into_directory-"<<to_string(count)<<","<<result<<endl;
-		outfile<<to_string(count)<<","<<result<<endl;count++;result="";
-		delete read_buf;
+        int k=0;
+		while(k<int(time/0.1)){
+			write(serial_port,&option,1);
+ 			char read_buf;
+			while(1){
+				num_bytes = read(serial_port,&read_buf,1);
+ 				if (num_bytes < 0) {
+      					printf("Error reading: %s", strerror(errno));
+      					return 1;
+      				 }
+      				if(read_buf!='\n')
+        				result=result+char(read_buf);
+    				else
+        				break;
+				}// write inputted data into the file.
+			cout<<"writing into_directory-"<<to_string(count)<<","<<result<<endl;
+			outfile<<to_string(count)<<","<<result<<endl;count++;result="";k++;
+		    
+
+			}
 		}
 	else if(option=='1'){
-		double Kp,Ki,Kd,speed;
+		double Kp,Ki,Kd;
     		cout<<"Enter Kp, Ki, Kd values ?\n";
     		cin>>Kp;cin>>Ki;cin>>Kd;
-    		cout<<"Enter speed ?\n";cin>>speed;
 		write(serial_port,&option,1);
 		change_parameter(serial_port,Kp);
     		change_parameter(serial_port,Ki);
     		change_parameter(serial_port,Kd);
-    		change_parameter(serial_port,speed);
 		cout<<"Done parameter tuning\n";
 		}
-	else if(option=='2'|| option=='3' || option=='4'){//forward
+	else if(option=='5'){
+		double speed;
+    		cout<<"Enter speed ?\n";cin>>speed;
+		write(serial_port,&option,1);
+    		change_parameter(serial_port,speed);
+		cout<<"Task accomplished\n";
+		}
+	else if(option=='2'|| option=='3' || option=='4'){//forward,backward or stop
 		write(serial_port,&option,1);
 		}
 
