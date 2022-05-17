@@ -114,7 +114,7 @@ void loop() {
   else if(inChar=='0'){
     //Display
 
-    Serial.println(String(set_speed));//change kp to speed.
+    Serial.println(String(pv_speed));//change kp to speed.
     
   }
   else if(inChar=='2'){// move the motor
